@@ -10,8 +10,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
 
+# Load environment variables FIRST - before any imports that use them
+load_dotenv()
+
 # Import configuration
-from config import MODEL_OPTIONS, initialize_language_model
+from config import MODEL_OPTIONS, initialize_language_model, APIKeyError
 
 # Import core functionality
 from core import (
@@ -45,9 +48,6 @@ try:
 except ImportError as e:
     st.warning(f"External search not available: {e}")
     EXTERNAL_SEARCH_AVAILABLE = False
-
-# Load environment variables
-load_dotenv()
 
 # Initialize session state
 if 'chat_history' not in st.session_state:

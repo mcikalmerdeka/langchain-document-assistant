@@ -54,9 +54,9 @@ def render_developer_flow_expander():
         """
     )
 
-def render_old_approach_flow_expander():
-    """Render developer execution flow expander for old approach script"""
-    return st.expander("🔧 Application Execution Flow - Old Approach (For Developers)").markdown(
+def render_inmemory_flow_expander():
+    """Render developer execution flow expander for InMemoryVectorStore implementation"""
+    return st.expander("🔧 Application Execution Flow (For Developers)").markdown(
         """
         **1. Document Processing Pipeline:**
         - `save_uploaded_file()` → Save PDF to `data/pdfs/`
@@ -78,11 +78,11 @@ def render_old_approach_flow_expander():
         - Step 4: Combine document + external context using enhanced prompt
         - Step 5: Generate final response and clean formatting
 
-        **4. Key Differences from Main Version:**
-        - Uses InMemoryVectorStore (non-persistent, session-based)
-        - Document existence check via similarity search
-        - **Same external search capabilities as main version**
-        - Session-based storage vs persistent ChromaDB
+        **4. Vector Store:**
+        - Uses **InMemoryVectorStore** for storing document embeddings
+        - Non-persistent, session-based storage (vectors stored in RAM)
+        - Unlike ChromaDB, data is lost when the application restarts
+        - Suitable for development/testing or when persistence is not required
         """
     )
 

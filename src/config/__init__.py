@@ -13,7 +13,7 @@ from .settings import (
     ANTHROPIC_API_KEY
 )
 
-from .models import initialize_language_model
+from .models import initialize_language_model, APIKeyError
 
 __all__ = [
     'PDF_STORAGE_PATH',
@@ -26,5 +26,6 @@ __all__ = [
     'CHROMA_COLLECTION_NAME',
     'OPENAI_API_KEY',
     'ANTHROPIC_API_KEY',
-    'initialize_language_model'
+    'initialize_language_model',
+    'APIKeyError'
 ]

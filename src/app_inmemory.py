@@ -10,8 +10,11 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
 
+# Load environment variables FIRST - before any imports that use them
+load_dotenv()
+
 # Import configuration
-from config import MODEL_OPTIONS, initialize_language_model
+from config import MODEL_OPTIONS, initialize_language_model, APIKeyError
 
 # Import core functionality
 from core import (
@@ -29,7 +32,7 @@ from styles import apply_custom_theme
 from components import (
     render_app_header,
     render_app_info_expander,
-    render_old_approach_flow_expander,
+    render_inmemory_flow_expander,
     render_model_selector,
     render_external_search_toggle,
     render_clear_chat_button,
@@ -46,14 +49,6 @@ except ImportError as e:
     st.warning(f"External search not available: {e}")
     EXTERNAL_SEARCH_AVAILABLE = False
 
-"""
-This uses InMemoryVectorStore instead of ChromaDB for document storage.
-Suitable for development/testing or when persistence is not required.
-"""
-
-# Load environment variables
-load_dotenv()
-
 # Initialize session state
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
@@ -69,7 +64,7 @@ render_app_header("📘 DocuChat AI - InMemory", "InMemoryVectorStore Implementa
 
 # Render information expanders
 render_app_info_expander()
-render_old_approach_flow_expander()
+render_inmemory_flow_expander()
 
 # Sidebar components
 render_clear_chat_button()
@@ -77,13 +72,24 @@ selected_model = render_model_selector(MODEL_OPTIONS)
 external_search_enabled = render_external_search_toggle(EXTERNAL_SEARCH_AVAILABLE)
 
 # Initialize the chosen language model
-LANGUAGE_MODEL = initialize_language_model(selected_model)
+try:
+    LANGUAGE_MODEL = initialize_language_model(selected_model)
+    model_initialized = True
+except APIKeyError as e:
+    st.error(f"⚠️ {str(e)}")
+    st.info("Please create a `.env` file in the project root with your API keys:\n\n```\nOPENAI_API_KEY=your_openai_key_here\nANTHROPIC_API_KEY=your_anthropic_key_here\n```")
+    LANGUAGE_MODEL = None
+    model_initialized = False
+except Exception as e:
+    st.error(f"⚠️ Error initializing language model: {str(e)}")
+    LANGUAGE_MODEL = None
+    model_initialized = False
 
 # File Upload Section
 uploaded_pdf = render_file_uploader()
 
 # Main App Logic
-if uploaded_pdf:
+if uploaded_pdf and model_initialized:
     saved_path = save_uploaded_file(uploaded_pdf)
     vector_store = st.session_state.vector_store
     
@@ -155,3 +161,6 @@ if uploaded_pdf:
         
         # Rerun to display the updated chat history
         st.rerun()
+
+elif uploaded_pdf and not model_initialized:
+    st.warning("Please configure your API keys in the `.env` file before uploading documents.")
