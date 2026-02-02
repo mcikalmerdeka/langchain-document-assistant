@@ -8,7 +8,9 @@ from .settings import (
     DEFAULT_CHUNK_OVERLAP,
     DEFAULT_RETRIEVAL_K,
     CHROMA_PERSIST_DIR,
-    CHROMA_COLLECTION_NAME
+    CHROMA_COLLECTION_NAME,
+    OPENAI_API_KEY,
+    ANTHROPIC_API_KEY
 )
 
 from .models import initialize_language_model
@@ -22,5 +24,7 @@ __all__ = [
     'DEFAULT_RETRIEVAL_K',
     'CHROMA_PERSIST_DIR',
     'CHROMA_COLLECTION_NAME',
+    'OPENAI_API_KEY',
+    'ANTHROPIC_API_KEY',
     'initialize_language_model'
 ]

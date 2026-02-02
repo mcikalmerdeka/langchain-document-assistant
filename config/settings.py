@@ -1,6 +1,11 @@
 """
 Application settings and constants
 """
+import os
+
+# API Keys
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 # Storage paths
 PDF_STORAGE_PATH = 'document_store/pdfs/'
@@ -17,9 +22,8 @@ DEFAULT_RETRIEVAL_K = 5
 
 # Model options for UI
 MODEL_OPTIONS = {
-    "GPT-4o": "gpt-4o",
-    "GPT-4.1": "gpt-4.1",
-    "Claude Sonnet 4": "claude-sonnet-4-20250514"
+    "GPT-4.1 mini": "gpt-4.1-mini",
+    "Claude Haiku 4.5": "claude-haiku-4-5-20251001"
 }
 
 # LLM configuration
