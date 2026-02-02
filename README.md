@@ -6,23 +6,23 @@ A powerful LLM-powered document assistant that extracts information from various
 
 ## 🌐 Try the Live Demo
 
-**🚀 [Launch DocuChat AI](https://docu-chat-ai.streamlit.app/)**
+**🚀 [Streamlit Cloud DocuChat AI](https://langchain-document-assistant-auldxzfdehcrpnqyhwkjz5.streamlit.app/)**
 
 Experience the power of AI-driven document analysis instantly! No setup required - just upload your PDF and start asking questions.
 
 ### Cloud vs Local Deployment
 
-| Feature                    | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)     |
-| -------------------------- | --------------------------------------------------- | ---------------------------------------- |
-| **Setup**            | Zero setup - ready to use                           | Requires local installation & API keys   |
-| **Storage**          | InMemoryVectorStore (session-based)                 | ChromaDB (persistent)                    |
-| **File Persistence** | Documents reset on app restart                      | Documents saved permanently              |
-| **Performance**      | Shared resources, 1GB memory limit                  | Full local resources                     |
-| **Concurrent Users** | 3-5 users on free tier                              | Single user (your machine)               |
-| **External Search**  | Limited without Tavily API key                      | Full capability with API keys            |
-| **Source Citations** | ✅ Full metadata tracking                           | ✅ Full metadata tracking                |
-| **Privacy**          | Documents processed on Streamlit servers            | Complete local privacy                   |
-| **Best For**         | Quick testing, sharing, demos                       | Production use, large documents, privacy |
+| Feature              | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)             |
+| -------------------- | --------------------------------------------- | ---------------------------------------- |
+| **Setup**            | Zero setup - ready to use                     | Requires local installation & API keys   |
+| **Storage**          | InMemoryVectorStore (session-based)           | ChromaDB (persistent)                    |
+| **File Persistence** | Documents reset on app restart                | Documents saved permanently              |
+| **Performance**      | Shared resources, 1GB memory limit            | Full local resources                     |
+| **Concurrent Users** | 3-5 users on free tier                        | Single user (your machine)               |
+| **External Search**  | Limited without Tavily API key                | Full capability with API keys            |
+| **Source Citations** | ✅ Full metadata tracking                     | ✅ Full metadata tracking                |
+| **Privacy**          | Documents processed on Streamlit servers      | Complete local privacy                   |
+| **Best For**         | Quick testing, sharing, demos                 | Production use, large documents, privacy |
 
 ## 🚀 Features
 
@@ -241,6 +241,7 @@ sequenceDiagram
    ```bash
    uv pip install .
    ```
+
 3. Create a `.env` file with your API keys:
 
    ```
@@ -248,12 +249,14 @@ sequenceDiagram
    ANTHROPIC_API_KEY=your_anthropic_api_key
    TAVILY_API_KEY=your_tavily_api_key
    ```
+
 4. Get a **Tavily API key** from [https://tavily.com/](https://tavily.com/) for external search functionality
 5. For local models, install Ollama and pull the DeepSeek models:
 
    ```
    ollama pull deepseek-r1:1.5b
    ```
+
 6. Create a directory for document storage:
 
    ```
