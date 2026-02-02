@@ -12,16 +12,17 @@ Experience the power of AI-driven document analysis instantly! No setup required
 
 ### Cloud vs Local Deployment
 
-| Feature              | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)             |
-| -------------------- | --------------------------------------------- | ---------------------------------------- |
-| **Setup**            | Zero setup - ready to use                     | Requires local installation & API keys   |
-| **Storage**          | InMemoryVectorStore (session-based)           | ChromaDB (persistent)                    |
-| **File Persistence** | Documents reset on app restart                | Documents saved permanently              |
-| **Performance**      | Shared resources, 1GB memory limit            | Full local resources                     |
-| **Concurrent Users** | 3-5 users on free tier                        | Single user (your machine)               |
-| **External Search**  | Limited without Tavily API key                | Full capability with API keys            |
-| **Privacy**          | Documents processed on Streamlit servers      | Complete local privacy                   |
-| **Best For**         | Quick testing, sharing, demos                 | Production use, large documents, privacy |
+| Feature                    | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)     |
+| -------------------------- | --------------------------------------------------- | ---------------------------------------- |
+| **Setup**            | Zero setup - ready to use                           | Requires local installation & API keys   |
+| **Storage**          | InMemoryVectorStore (session-based)                 | ChromaDB (persistent)                    |
+| **File Persistence** | Documents reset on app restart                      | Documents saved permanently              |
+| **Performance**      | Shared resources, 1GB memory limit                  | Full local resources                     |
+| **Concurrent Users** | 3-5 users on free tier                              | Single user (your machine)               |
+| **External Search**  | Limited without Tavily API key                      | Full capability with API keys            |
+| **Source Citations** | ✅ Full metadata tracking                           | ✅ Full metadata tracking                |
+| **Privacy**          | Documents processed on Streamlit servers            | Complete local privacy                   |
+| **Best For**         | Quick testing, sharing, demos                       | Production use, large documents, privacy |
 
 ## 🚀 Features
 
@@ -29,6 +30,8 @@ Experience the power of AI-driven document analysis instantly! No setup required
 - **Document Processing**: Efficiently processes PDF documents, extracting and indexing their content
 - **Semantic Search**: Uses vector embeddings to find the most relevant information from your documents
 - **🔍 External Search Integration**: Automatically searches external sources when document context is insufficient
+- **📚 Source Citations**: View source metadata (filename, page numbers, chunk info) for every AI response
+- **Rich Metadata Tracking**: Each document chunk includes filename, page number, upload timestamp, and file size
 - **Conversational Interface**: Clean, intuitive chat interface to ask questions about your documents
 - **Custom Styling**: Dark mode interface with responsive design
 - **Multiple Vector Store Options**: Supports both ChromaDB (current approach) and InMemoryVectorStore (legacy approach)
@@ -39,6 +42,8 @@ Experience the power of AI-driven document analysis instantly! No setup required
 - Built with **LangChain** framework for document processing and retrieval augmented generation (RAG)
 - Utilizes **Streamlit** for the web interface
 - **Professional Architecture**: Modular structure with separated config, core logic, and UI components
+- **Rich Metadata Tracking**: Documents include filename, page numbers, file size, upload timestamp, and chunk index
+- **Source Citations**: Each AI response shows which pages and files were used as sources
 - Implements chunking with `RecursiveCharacterTextSplitter` for optimal document segmentation
 - **External Search**: Powered by **Tavily Search API** for up-to-date external information
 - **Intelligent Agent System**: Uses LangChain agents (v1 API) with modern `create_agent` pattern
@@ -48,6 +53,42 @@ Experience the power of AI-driven document analysis instantly! No setup required
 - Supports semantic search with both cloud and local embedding models
 - Handles PDF documents using `PyMuPDFLoader` (cloud models) and `PDFPlumberLoader` (DeepSeek version)
 - Includes chat history management for continuous conversations
+
+## 📚 Source Citations & Metadata Tracking
+
+### What It Does
+
+Every AI response now includes **source citations** showing exactly where the information came from:
+
+- **Filename**: The source PDF document name
+- **Page Numbers**: Which pages in the document contain the relevant information
+- **Chunk Information**: How many chunks were used from each source
+- **File Metadata**: Upload timestamp and file size
+
+### How It Works
+
+1. **Document Ingestion**: When you upload a PDF, the system extracts rich metadata (filename, page numbers, file size, upload timestamp)
+2. **Chunk Processing**: Each text chunk retains metadata about its source page and position
+3. **Retrieval**: When answering questions, the system tracks which chunks provided the context
+4. **Source Display**: Click "📚 View Sources" under any AI response to see the source information
+
+### Example Source Display
+
+```
+📚 View Sources
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📄 research_paper.pdf
+   - Page range: Pages 5-7
+   - Chunks used: 3
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+### Benefits
+
+- **Transparency**: Know exactly which document and pages the AI used
+- **Verification**: Easily verify information by checking the source pages
+- **Multi-Document Support**: See sources from multiple uploaded documents
+- **Academic Use**: Perfect for research, citations, and fact-checking
 
 ## 🔍 External Search Integration
 
@@ -200,7 +241,6 @@ sequenceDiagram
    ```bash
    uv pip install .
    ```
-
 3. Create a `.env` file with your API keys:
 
    ```
@@ -208,14 +248,12 @@ sequenceDiagram
    ANTHROPIC_API_KEY=your_anthropic_api_key
    TAVILY_API_KEY=your_tavily_api_key
    ```
-
 4. Get a **Tavily API key** from [https://tavily.com/](https://tavily.com/) for external search functionality
 5. For local models, install Ollama and pull the DeepSeek models:
 
    ```
    ollama pull deepseek-r1:1.5b
    ```
-
 6. Create a directory for document storage:
 
    ```
@@ -257,10 +295,10 @@ streamlit run app_deepseek.py
 #### Cloud Deployment Version
 
 ```bash
-streamlit run streamlit_cloud.py
+streamlit run app_inmemory.py
 ```
 
-**Best for**: Deploying to Streamlit Community Cloud or similar platforms
+**Best for**: Deploying to Streamlit Community Cloud or similar platforms (uses InMemoryVectorStore, no persistence)
 
 ### How to Use
 
@@ -269,7 +307,8 @@ streamlit run streamlit_cloud.py
 3. Wait for the document to be processed, chunked, and indexed
 4. Ask questions about the document content using the chat interface
 5. **Enhanced Responses**: Get AI-generated responses that combine document content with external search results (when enabled)
-6. Use the "Clear Chat History" button in the sidebar to start a new conversation
+6. **View Sources**: Click "📚 View Sources" under any AI response to see which pages and files were used
+7. Use the "Clear Chat History" button in the sidebar to start a new conversation
 
 ## 🌐 Cloud Deployment
 
@@ -300,7 +339,7 @@ The application is deployed on **Streamlit Community Cloud** and accessible at:
 2. **Deploy on Streamlit Cloud:**
    - Go to [share.streamlit.io/new](https://share.streamlit.io/new)
    - Select your forked repository
-   - **Main file path:** `streamlit_cloud.py`
+   - **Main file path:** `app_inmemory.py`
 3. **Set environment variables:**
    ```
    OPENAI_API_KEY=your_openai_api_key_here
@@ -312,12 +351,12 @@ The application is deployed on **Streamlit Community Cloud** and accessible at:
 
 ## 📊 Comparison of Available Models
 
-| Model           | Type  | Best For                                       | Required Setup      | Implementation                            | External Search |
-| --------------- | ----- | ---------------------------------------------- | ------------------- | ----------------------------------------- | --------------- |
-| GPT-4o          | Cloud | High accuracy, complex queries                 | OpenAI API key      | ChatOpenAI with temperature=0             | ✅              |
-| GPT-4.1         | Cloud | Latest OpenAI model with improved reasoning    | OpenAI API key      | ChatOpenAI with temperature=0             | ✅              |
-| Claude Sonnet 4 | Cloud | Latest Claude model with enhanced capabilities | Anthropic API key   | ChatAnthropic with temperature=0          | ✅              |
-| DeepSeek R1     | Local | Privacy, offline use, faster responses         | Ollama installation | OllamaLLM with the deepseek-r1:1.5b model | ✅              |
+| Model           | Type  | Best For                                       | Required Setup      | Implementation                            | External Search | Source Citations |
+| --------------- | ----- | ---------------------------------------------- | ------------------- | ----------------------------------------- | --------------- | ---------------- |
+| GPT-4o          | Cloud | High accuracy, complex queries                 | OpenAI API key      | ChatOpenAI with temperature=0             | ✅              | ✅               |
+| GPT-4.1         | Cloud | Latest OpenAI model with improved reasoning    | OpenAI API key      | ChatOpenAI with temperature=0             | ✅              | ✅               |
+| Claude Sonnet 4 | Cloud | Latest Claude model with enhanced capabilities | Anthropic API key   | ChatAnthropic with temperature=0          | ✅              | ✅               |
+| DeepSeek R1     | Local | Privacy, offline use, faster responses         | Ollama installation | OllamaLLM with the deepseek-r1:1.5b model | ✅              | ✅               |
 
 ## 🔍 Embedding Models
 
@@ -361,7 +400,7 @@ The application uses different embedding models based on the version:
 
 - **Lightweight**: Simple in-memory storage with no persistence
 - **Fast for Small Datasets**: Efficient for smaller document collections
-- **Implementation**: Used in `app_inmemory.py`, `app_deepseek.py`, and `streamlit_cloud.py`
+- **Implementation**: Used in `app_inmemory.py` and `app_deepseek.py`
 
 ## 🤖 External Search Agent Architecture
 
@@ -398,17 +437,16 @@ langchain-document-assistant/
 │   ├── models.py                # LLM initialization
 │   └── prompts/                 # Prompt templates
 ├── core/                        # Core Business Logic
-│   ├── document_processor.py    # PDF loading, chunking
+│   ├── document_processor.py    # PDF loading, chunking, metadata extraction
 │   ├── vector_store.py          # Vector store wrappers
-│   └── rag_chain.py             # RAG chain & answer generation
+│   └── rag_chain.py             # RAG chain & answer generation with source tracking
 ├── agents/                      # Agent implementations
 ├── tools/                       # Tool implementations
 ├── components/                  # UI components
 ├── styles/                      # Styling
-├── app.py                       # Main app (ChromaDB)
-├── app_inmemory.py              # Development version
-├── app_deepseek.py              # DeepSeek local LLM version
-└── streamlit_cloud.py           # Cloud deployment version
+├── app.py                       # Main app (ChromaDB with metadata)
+├── app_inmemory.py              # Cloud deployment version (with metadata)
+├── app_deepseek.py              # DeepSeek local LLM version (with metadata)
 ```
 
 This modular architecture provides:
