@@ -12,17 +12,17 @@ Experience the power of AI-driven document analysis instantly! No setup required
 
 ### Cloud vs Local Deployment
 
-| Feature              | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)             |
-| -------------------- | --------------------------------------------- | ---------------------------------------- |
-| **Setup**            | Zero setup - ready to use                     | Requires local installation & API keys   |
-| **Storage**          | InMemoryVectorStore (session-based)           | ChromaDB (persistent)                    |
-| **File Persistence** | Documents reset on app restart                | Documents saved permanently              |
-| **Performance**      | Shared resources, 1GB memory limit            | Full local resources                     |
-| **Concurrent Users** | 3-5 users on free tier                        | Single user (your machine)               |
-| **External Search**  | Limited without Tavily API key                | Full capability with API keys            |
-| **Source Citations** | ✅ Full metadata tracking                     | ✅ Full metadata tracking                |
-| **Privacy**          | Documents processed on Streamlit servers      | Complete local privacy                   |
-| **Best For**         | Quick testing, sharing, demos                 | Production use, large documents, privacy |
+| Feature                    | **Cloud Version** (Streamlit Community Cloud) | **Local Version** (`app.py`)     |
+| -------------------------- | --------------------------------------------------- | ---------------------------------------- |
+| **Setup**            | Zero setup - ready to use                           | Requires local installation & API keys   |
+| **Storage**          | InMemoryVectorStore (session-based)                 | ChromaDB (persistent)                    |
+| **File Persistence** | Documents reset on app restart                      | Documents saved permanently              |
+| **Performance**      | Shared resources, 1GB memory limit                  | Full local resources                     |
+| **Concurrent Users** | 3-5 users on free tier                              | Single user (your machine)               |
+| **External Search**  | Limited without Tavily API key                      | Full capability with API keys            |
+| **Source Citations** | ✅ Full metadata tracking                           | ✅ Full metadata tracking                |
+| **Privacy**          | Documents processed on Streamlit servers            | Complete local privacy                   |
+| **Best For**         | Quick testing, sharing, demos                       | Production use, large documents, privacy |
 
 ## 🚀 Features
 
@@ -241,7 +241,6 @@ sequenceDiagram
    ```bash
    uv pip install .
    ```
-
 3. Create a `.env` file with your API keys:
 
    ```
@@ -249,18 +248,17 @@ sequenceDiagram
    ANTHROPIC_API_KEY=your_anthropic_api_key
    TAVILY_API_KEY=your_tavily_api_key
    ```
-
 4. Get a **Tavily API key** from [https://tavily.com/](https://tavily.com/) for external search functionality
 5. For local models, install Ollama and pull the DeepSeek models:
 
    ```
    ollama pull deepseek-r1:1.5b
    ```
-
-6. Create a directory for document storage:
+6. Create directories for document storage and ChromaDB:
 
    ```
-   mkdir -p document_store/pdfs
+   mkdir -p data/pdfs
+   mkdir -p chroma_db
    ```
 
 ## 🚀 Usage
@@ -274,7 +272,7 @@ Simply visit **[https://docu-chat-ai.streamlit.app/](https://docu-chat-ai.stream
 #### Production Version (ChromaDB Persistent Storage)
 
 ```bash
-streamlit run app.py
+streamlit run src/app.py
 ```
 
 **Best for**: Production use, persistent document storage, multiple documents
@@ -282,7 +280,7 @@ streamlit run app.py
 #### Development Version (InMemory Storage)
 
 ```bash
-streamlit run app_inmemory.py
+streamlit run src/app_inmemory.py
 ```
 
 **Best for**: Testing, development, temporary document analysis
@@ -290,7 +288,7 @@ streamlit run app_inmemory.py
 #### Local LLM Version (DeepSeek R1 with Ollama)
 
 ```bash
-streamlit run app_deepseek.py
+streamlit run src/app_deepseek.py
 ```
 
 **Best for**: Privacy-focused use, offline processing, local LLM experimentation
@@ -298,7 +296,7 @@ streamlit run app_deepseek.py
 #### Cloud Deployment Version
 
 ```bash
-streamlit run app_inmemory.py
+streamlit run src/app_inmemory.py
 ```
 
 **Best for**: Deploying to Streamlit Community Cloud or similar platforms (uses InMemoryVectorStore, no persistence)
@@ -342,7 +340,7 @@ The application is deployed on **Streamlit Community Cloud** and accessible at:
 2. **Deploy on Streamlit Cloud:**
    - Go to [share.streamlit.io/new](https://share.streamlit.io/new)
    - Select your forked repository
-   - **Main file path:** `app_inmemory.py`
+   - **Main file path:** `src/app_inmemory.py`
 3. **Set environment variables:**
    ```
    OPENAI_API_KEY=your_openai_api_key_here
@@ -435,33 +433,40 @@ The application uses an intelligent agent system for external search:
 
 ```
 langchain-document-assistant/
-├── config/                      # Configuration & Settings
-│   ├── settings.py              # Constants, paths, model configs
-│   ├── models.py                # LLM initialization
-│   └── prompts/                 # Prompt templates
-├── core/                        # Core Business Logic
-│   ├── document_processor.py    # PDF loading, chunking, metadata extraction
-│   ├── vector_store.py          # Vector store wrappers
-│   └── rag_chain.py             # RAG chain & answer generation with source tracking
-├── agents/                      # Agent implementations
-├── tools/                       # Tool implementations
-├── components/                  # UI components
-├── styles/                      # Styling
-├── app.py                       # Main app (ChromaDB with metadata)
-├── app_inmemory.py              # Cloud deployment version (with metadata)
-├── app_deepseek.py              # DeepSeek local LLM version (with metadata)
+├── src/                         # Source code
+│   ├── config/                  # Configuration & Settings
+│   │   ├── settings.py          # Constants, paths, model configs
+│   │   ├── models.py            # LLM initialization
+│   │   └── prompts/             # Prompt templates
+│   ├── core/                    # Core Business Logic
+│   │   ├── document_processor.py    # PDF loading, chunking, metadata extraction
+│   │   ├── vector_store.py      # Vector store wrappers
+│   │   └── rag_chain.py         # RAG chain & answer generation with source tracking
+│   ├── agents/                  # Agent implementations
+│   ├── tools/                   # Tool implementations
+│   ├── components/              # UI components
+│   ├── styles/                  # Styling
+│   ├── app.py                   # Main app (ChromaDB with metadata)
+│   ├── app_inmemory.py          # Cloud deployment version (with metadata)
+│   └── app_deepseek.py          # DeepSeek local LLM version (with metadata)
+├── data/                        # User uploaded PDFs
+├── chroma_db/                   # Vector database storage (auto-generated, gitignored)
+├── assets/                      # Project images and screenshots
+└── other/                       # Additional documentation
 ```
 
 This modular architecture provides:
 
+- **Professional Structure**: `src/` folder keeps source code separate from data and assets
 - **Separation of Concerns**: Config, core logic, and UI are separated
+- **Data Isolation**: `data/`, `chroma_db/`, and `assets/` remain outside `src/` for cleaner organization
 - **Reusability**: Core modules can be imported and reused
 - **Maintainability**: Easy to find and modify specific functionality
 - **Scalability**: Simple to add new features without bloating main files
 
 ## Project Screenshots
 
-In this demo I used the BPS Palu City data of [population and employment](https://github.com/mcikalmerdeka/NLP-Learning/blob/main/Langchain%20Document%20Assistant%20with%20Deepseek%20R1%20-%20GPT4o%20-%20Claude%203.5%20Sonnet/document_store/pdfs/Statistik%20Penduduk%20dan%20Ketenagakerjaan%20Kota%20Palu%202025.pdf) from the official report of "Kota Palu Dalam Angka 2025" which you can access in this `document_store` folder in this repo. You may use several example files that I stored there or use your own PDFs.
+In this demo I used the BPS Palu City data of [population and employment](https://github.com/mcikalmerdeka/NLP-Learning/blob/main/Langchain%20Document%20Assistant%20with%20Deepseek%20R1%20-%20GPT4o%20-%20Claude%203.5%20Sonnet/data/pdfs/Statistik%20Penduduk%20dan%20Ketenagakerjaan%20Kota%20Palu%202025.pdf) from the official report of "Kota Palu Dalam Angka 2025" which you can access in this `data/pdfs` folder in this repo. You may use several example files that I stored there or use your own PDFs.
 
 ### Document Upload Interface
 

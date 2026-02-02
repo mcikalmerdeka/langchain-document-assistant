@@ -8,7 +8,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ANTHROPIC_API_KEY = os.getenv("ANTHROPIC_API_KEY")
 
 # Storage paths
-PDF_STORAGE_PATH = 'document_store/pdfs/'
+PDF_STORAGE_PATH = 'data/pdfs/'
 CHROMA_PERSIST_DIR = './chroma_db'
 CHROMA_COLLECTION_NAME = 'document_chunks'
 

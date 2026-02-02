@@ -28,7 +28,7 @@ def render_developer_flow_expander():
     return st.expander("🔧 Application Execution Flow (For Developers)").markdown(
         """
         **1. Document Processing Pipeline:**
-        - `save_uploaded_file()` → Save PDF to `document_store/pdfs/`
+        - `save_uploaded_file()` → Save PDF to `data/pdfs/`
         - `document_already_exists()` → Check if file exists in vector store
         - `load_pdf_documents()` → Load PDF using PyMuPDFLoader
         - `chunk_documents()` → Split into 1000-char chunks with 200 overlap
@@ -59,7 +59,7 @@ def render_old_approach_flow_expander():
     return st.expander("🔧 Application Execution Flow - Old Approach (For Developers)").markdown(
         """
         **1. Document Processing Pipeline:**
-        - `save_uploaded_file()` → Save PDF to `document_store/pdfs/`
+        - `save_uploaded_file()` → Save PDF to `data/pdfs/`
         - `document_already_exists()` → Check if file exists in InMemoryVectorStore
         - `load_pdf_documents()` → Load PDF using PyMuPDFLoader
         - `chunk_documents()` → Split into 1000-char chunks with 200 overlap
@@ -91,7 +91,7 @@ def render_deepseek_flow_expander():
     return st.expander("🔧 Application Execution Flow - DeepSeek R1 (For Developers)").markdown(
         """
         **1. Document Processing Pipeline:**
-        - `save_uploaded_file()` → Save PDF to `document_store/pdfs/`
+        - `save_uploaded_file()` → Save PDF to `data/pdfs/`
         - `load_pdf_documents()` → Load PDF using PDFPlumberLoader
         - `chunk_documents()` → Split into 1000-char chunks with 200 overlap
         - `index_documents()` → Store embeddings in InMemoryVectorStore
