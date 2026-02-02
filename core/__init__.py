@@ -4,7 +4,9 @@ from .document_processor import (
     save_uploaded_file,
     load_pdf_documents,
     chunk_documents,
-    format_docs
+    format_docs,
+    format_docs_with_metadata,
+    get_unique_sources
 )
 
 from .vector_store import (
@@ -14,7 +16,8 @@ from .vector_store import (
 
 from .rag_chain import (
     create_rag_chain,
-    generate_enhanced_answer
+    generate_enhanced_answer,
+    format_sources_for_display
 )
 
 __all__ = [
@@ -22,8 +25,11 @@ __all__ = [
     'load_pdf_documents',
     'chunk_documents',
     'format_docs',
+    'format_docs_with_metadata',
+    'get_unique_sources',
     'ChromaVectorStore',
     'InMemoryVectorStoreWrapper',
     'create_rag_chain',
-    'generate_enhanced_answer'
+    'generate_enhanced_answer',
+    'format_sources_for_display'
 ]

@@ -169,10 +169,24 @@ def render_file_uploader(file_type="pdf", help_text="Select a PDF document for a
     )
 
 def display_chat_history():
-    """Display chat history from session state"""
+    """Display chat history from session state with sources"""
     for message in st.session_state.chat_history:
         with st.chat_message(message["role"], avatar="🤖" if message["role"] == "assistant" else None):
             st.write(message["content"])
+            
+            # Display sources if available (only for assistant messages)
+            if message["role"] == "assistant" and "sources" in message and message["sources"]:
+                with st.expander("📚 View Sources", expanded=False):
+                    st.markdown("**Retrieved from:**")
+                    for i, source in enumerate(message["sources"], 1):
+                        filename = source.get("filename", "Unknown file")
+                        page_range = source.get("page_range", "N/A")
+                        chunks = source.get("chunks_used", 0)
+                        
+                        st.markdown(f"**{i}.** 📄 `{filename}`")
+                        st.markdown(f"   - Page range: {page_range}")
+                        st.markdown(f"   - Chunks used: {chunks}")
+                        st.markdown("---")
 
 def render_status_message(message_type, message, is_new_doc=False, model_name="", mode_info=""):
     """Render standardized status messages"""

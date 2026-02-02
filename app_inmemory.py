@@ -20,7 +20,8 @@ from core import (
     chunk_documents,
     InMemoryVectorStoreWrapper,
     create_rag_chain,
-    generate_enhanced_answer
+    generate_enhanced_answer,
+    format_sources_for_display
 )
 
 # Import UI components
@@ -132,8 +133,8 @@ if uploaded_pdf:
         spinner_message = "Analyzing document with AI (external search enabled)..." if external_search_enabled else "Analyzing document with AI (document only mode)..."
         
         with st.spinner(spinner_message):
-            # Use the enhanced answer generation
-            ai_response = generate_enhanced_answer(
+            # Use the enhanced answer generation (now returns tuple of answer and sources)
+            ai_response, sources = generate_enhanced_answer(
                 user_input, 
                 st.session_state.rag_chain, 
                 LANGUAGE_MODEL,
@@ -142,8 +143,15 @@ if uploaded_pdf:
                 EXTERNAL_SEARCH_AVAILABLE
             )
             
-            # Add assistant response to chat history
-            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+            # Format sources for display
+            formatted_sources = format_sources_for_display(sources)
+            
+            # Add assistant response to chat history with sources
+            st.session_state.chat_history.append({
+                "role": "assistant", 
+                "content": ai_response,
+                "sources": formatted_sources
+            })
         
         # Rerun to display the updated chat history
         st.rerun()

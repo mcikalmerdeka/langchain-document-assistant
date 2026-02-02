@@ -5,6 +5,7 @@ Uses InMemoryVectorStore and PDFPlumberLoader for better local processing
 import streamlit as st
 import sys
 import os
+from datetime import datetime
 
 # Add the current directory to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -23,7 +24,8 @@ from core import (
     chunk_documents,
     InMemoryVectorStoreWrapper,
     create_rag_chain,
-    generate_enhanced_answer
+    generate_enhanced_answer,
+    format_sources_for_display
 )
 
 # Import UI components
@@ -88,10 +90,42 @@ def save_uploaded_file(uploaded_file):
     return file_path
 
 
+def extract_pdf_metadata(file_path: str) -> dict:
+    """Extract PDF file metadata"""
+    try:
+        file_stat = os.stat(file_path)
+        return {
+            "source": file_path,
+            "filename": os.path.basename(file_path),
+            "file_size_bytes": file_stat.st_size,
+            "uploaded_at": datetime.now().isoformat(),
+            "file_type": "PDF"
+        }
+    except Exception:
+        return {
+            "source": file_path,
+            "filename": os.path.basename(file_path),
+            "file_type": "PDF"
+        }
+
+
 def load_pdf_documents(file_path):
-    """Load PDF documents using PDFPlumberLoader (better for complex PDFs)"""
+    """Load PDF documents using PDFPlumberLoader with metadata enrichment"""
     document_loader = PDFPlumberLoader(file_path)
-    return document_loader.load()
+    docs = document_loader.load()
+    
+    if not docs:
+        raise ValueError(f"Failed to load any content from PDF: {file_path}")
+    
+    # Extract file-level metadata
+    file_metadata = extract_pdf_metadata(file_path)
+    
+    # Enrich each document with metadata
+    for doc in docs:
+        doc.metadata.update(file_metadata)
+        doc.metadata["page_number"] = doc.metadata.get("page", 0) + 1  # 1-based page numbers
+    
+    return docs
 
 
 # Streamlit UI Configuration
@@ -145,8 +179,8 @@ if uploaded_pdf:
         spinner_message = "Analyzing document with DeepSeek R1 (external search enabled)..." if external_search_enabled else "Analyzing document with DeepSeek R1 (document only mode)..."
         
         with st.spinner(spinner_message):
-            # Use the enhanced answer generation
-            ai_response = generate_enhanced_answer(
+            # Use the enhanced answer generation (now returns tuple of answer and sources)
+            ai_response, sources = generate_enhanced_answer(
                 user_input, 
                 st.session_state.rag_chain, 
                 LANGUAGE_MODEL,
@@ -155,8 +189,15 @@ if uploaded_pdf:
                 EXTERNAL_SEARCH_AVAILABLE
             )
             
-            # Add assistant response to chat history
-            st.session_state.chat_history.append({"role": "assistant", "content": ai_response})
+            # Format sources for display
+            formatted_sources = format_sources_for_display(sources)
+            
+            # Add assistant response to chat history with sources
+            st.session_state.chat_history.append({
+                "role": "assistant", 
+                "content": ai_response,
+                "sources": formatted_sources
+            })
         
         # Rerun to display the updated chat history
         st.rerun()
