@@ -3,7 +3,7 @@
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
 from .settings import OPENAI_API_KEY, ANTHROPIC_API_KEY, LLM_TEMPERATURE, LLM_MAX_TOKENS
-from .logging import get_logger
+from .logging_config import get_logger
 
 logger = get_logger("models")
 

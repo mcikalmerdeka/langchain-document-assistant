@@ -8,7 +8,7 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from config.settings import PDF_STORAGE_PATH, DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
-from config.logging import get_logger
+from config.logging_config import get_logger
 
 logger = get_logger("document_processor")
 

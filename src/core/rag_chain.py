@@ -12,7 +12,7 @@ from config.prompts import (
     ENHANCED_PROMPT_TEMPLATE
 )
 from .document_processor import format_docs_with_metadata, get_unique_sources
-from config.logging import get_logger
+from config.logging_config import get_logger
 
 logger = get_logger("rag_chain")
 

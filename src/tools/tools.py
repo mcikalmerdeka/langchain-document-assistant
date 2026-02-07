@@ -4,7 +4,7 @@ import os
 from langchain_tavily import TavilySearch
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config.logging import get_logger
+from config.logging_config import get_logger
 
 logger = get_logger("tools")
 

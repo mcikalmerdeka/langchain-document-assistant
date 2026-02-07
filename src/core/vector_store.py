@@ -11,7 +11,7 @@ from config.settings import (
     CHROMA_COLLECTION_NAME,
     DEFAULT_RETRIEVAL_K
 )
-from config.logging import get_logger
+from config.logging_config import get_logger
 
 logger = get_logger("vector_store")
 

@@ -10,7 +10,7 @@ from langchain_openai import ChatOpenAI
 from langchain.agents import create_agent
 from langchain.tools import tool
 from tools.tools import search_external_resources
-from config.logging import get_logger
+from config.logging_config import get_logger
 
 load_dotenv()
 

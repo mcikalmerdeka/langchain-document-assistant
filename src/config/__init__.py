@@ -14,7 +14,7 @@ from .settings import (
 )
 
 from .models import initialize_language_model, APIKeyError
-from .logging import setup_logger, get_logger
+from .logging_config import setup_logger, get_logger
 
 __all__ = [
     'PDF_STORAGE_PATH',
