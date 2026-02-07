@@ -14,7 +14,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Import configuration
-from config import MODEL_OPTIONS, initialize_language_model, APIKeyError
+from config import MODEL_OPTIONS, initialize_language_model, APIKeyError, setup_logger
+
+# Setup application logger
+logger = setup_logger("docuschat_inmemory")
 
 # Import core functionality
 from core import (
@@ -45,7 +48,9 @@ from components import (
 try:
     from agents.external_sources_lookup_agent import lookup
     EXTERNAL_SEARCH_AVAILABLE = True
+    logger.info("External search agent loaded successfully")
 except ImportError as e:
+    logger.warning(f"External search not available: {e}")
     st.warning(f"External search not available: {e}")
     EXTERNAL_SEARCH_AVAILABLE = False
 
@@ -73,14 +78,18 @@ external_search_enabled = render_external_search_toggle(EXTERNAL_SEARCH_AVAILABL
 
 # Initialize the chosen language model
 try:
+    logger.info(f"Initializing language model: {selected_model}")
     LANGUAGE_MODEL = initialize_language_model(selected_model)
     model_initialized = True
+    logger.info(f"Language model {selected_model} initialized successfully")
 except APIKeyError as e:
+    logger.error(f"API Key error: {e}")
     st.error(f"⚠️ {str(e)}")
     st.info("Please create a `.env` file in the project root with your API keys:\n\n```\nOPENAI_API_KEY=your_openai_key_here\nANTHROPIC_API_KEY=your_anthropic_key_here\n```")
     LANGUAGE_MODEL = None
     model_initialized = False
 except Exception as e:
+    logger.error(f"Error initializing language model: {e}", exc_info=True)
     st.error(f"⚠️ Error initializing language model: {str(e)}")
     LANGUAGE_MODEL = None
     model_initialized = False
@@ -90,11 +99,13 @@ uploaded_pdf = render_file_uploader()
 
 # Main App Logic
 if uploaded_pdf and model_initialized:
+    logger.info(f"Processing uploaded PDF (InMemory): {uploaded_pdf.name}")
     saved_path = save_uploaded_file(uploaded_pdf)
     vector_store = st.session_state.vector_store
     
     # Check if document already exists before processing
     if not vector_store.document_exists(uploaded_pdf.name):
+        logger.info(f"Document {uploaded_pdf.name} not found in InMemory store, processing...")
         raw_docs = load_pdf_documents(saved_path)
         processed_chunks = chunk_documents(raw_docs)
         vector_store.add_documents(processed_chunks)
@@ -107,11 +118,14 @@ if uploaded_pdf and model_initialized:
         st.session_state.retriever = retriever
         st.session_state.rag_chain = rag_chain
         
+        logger.info(f"Document processed successfully with {len(processed_chunks)} chunks")
+        
         # Display success message
         mode_info = "with External Search" if external_search_enabled else "Document Only Mode"
         render_status_message("success", "New document processed and added to vector store! Ask your questions below", 
                             model_name=selected_model, mode_info=mode_info)
     else:
+        logger.info(f"Document {uploaded_pdf.name} already exists in InMemory vector store")
         # Document already exists, just create retriever and chain
         retriever = vector_store.create_retriever(k=5)
         rag_chain = create_rag_chain(LANGUAGE_MODEL, retriever, external_search_enabled)
@@ -132,6 +146,7 @@ if uploaded_pdf and model_initialized:
     user_input = st.chat_input("Enter your question about the document...")
     
     if user_input:
+        logger.info(f"User query received (InMemory): {user_input[:50]}...")
         # Add user message to chat history
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         
@@ -139,6 +154,7 @@ if uploaded_pdf and model_initialized:
         spinner_message = "Analyzing document with AI (external search enabled)..." if external_search_enabled else "Analyzing document with AI (document only mode)..."
         
         with st.spinner(spinner_message):
+            logger.debug("Generating AI response (InMemory)...")
             # Use the enhanced answer generation (now returns tuple of answer and sources)
             ai_response, sources = generate_enhanced_answer(
                 user_input, 
@@ -151,6 +167,8 @@ if uploaded_pdf and model_initialized:
             
             # Format sources for display
             formatted_sources = format_sources_for_display(sources)
+            
+            logger.info(f"AI response generated successfully (InMemory), length: {len(ai_response)} characters")
             
             # Add assistant response to chat history with sources
             st.session_state.chat_history.append({

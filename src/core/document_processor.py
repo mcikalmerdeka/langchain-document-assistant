@@ -8,6 +8,9 @@ from langchain_community.document_loaders import PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
 from config.settings import PDF_STORAGE_PATH, DEFAULT_CHUNK_SIZE, DEFAULT_CHUNK_OVERLAP
+from config.logging import get_logger
+
+logger = get_logger("document_processor")
 
 
 def save_uploaded_file(uploaded_file) -> str:
@@ -21,8 +24,10 @@ def save_uploaded_file(uploaded_file) -> str:
         str: Path to the saved file
     """
     file_path = PDF_STORAGE_PATH + uploaded_file.name
+    logger.info(f"Saving uploaded file: {uploaded_file.name} to {file_path}")
     with open(file_path, "wb") as file:
         file.write(uploaded_file.getbuffer())
+    logger.info(f"Successfully saved file: {file_path}")
     return file_path
 
 
@@ -66,14 +71,19 @@ def load_pdf_documents(file_path: str):
     Raises:
         ValueError: If no content could be loaded from the PDF
     """
+    logger.info(f"Loading PDF document from: {file_path}")
     document_loader = PyMuPDFLoader(file_path)
     docs = document_loader.load()
     
     if not docs:
+        logger.error(f"Failed to load any content from PDF: {file_path}")
         raise ValueError(f"Failed to load any content from PDF: {file_path}")
+    
+    logger.info(f"Loaded {len(docs)} pages from PDF: {file_path}")
     
     # Extract file-level metadata
     file_metadata = extract_pdf_metadata(file_path)
+    logger.debug(f"Extracted PDF metadata: {file_metadata}")
     
     # Enrich each document with metadata
     for doc in docs:
@@ -81,6 +91,7 @@ def load_pdf_documents(file_path: str):
         doc.metadata.update(file_metadata)
         doc.metadata["page_number"] = doc.metadata.get("page", 0) + 1  # 1-based page numbers
         
+    logger.info(f"Successfully enriched {len(docs)} documents with metadata")
     return docs
 
 
@@ -100,7 +111,10 @@ def chunk_documents(raw_documents, chunk_size: int = DEFAULT_CHUNK_SIZE,
     Raises:
         ValueError: If no documents to chunk or chunking produces no results
     """
+    logger.info(f"Chunking {len(raw_documents)} documents with size={chunk_size}, overlap={chunk_overlap}")
+    
     if not raw_documents:
+        logger.error("No documents to chunk. The document may be empty.")
         raise ValueError("No documents to chunk. The document may be empty.")
     
     text_processor = RecursiveCharacterTextSplitter(
@@ -112,13 +126,17 @@ def chunk_documents(raw_documents, chunk_size: int = DEFAULT_CHUNK_SIZE,
     chunks = text_processor.split_documents(raw_documents)
     
     if not chunks:
+        logger.error("Chunking produced no results. The document may contain no text.")
         raise ValueError("Chunking produced no results. The document may contain no text.")
+    
+    logger.info(f"Created {len(chunks)} chunks from {len(raw_documents)} documents")
     
     # Add chunk index to metadata for tracking
     for i, chunk in enumerate(chunks):
         chunk.metadata["chunk_index"] = i
         chunk.metadata["total_chunks"] = len(chunks)
     
+    logger.debug(f"Successfully enriched all chunks with metadata")
     return chunks
 
 

@@ -1,6 +1,18 @@
-.env
-.venv/
-chroma_db/
+# Python artifacts
 __pycache__/
+
+# Environment variables
+.env
+
+# Virtual environment
+.venv/
+
+# Vector store
+chroma_db/
+
+# Logs
+logs/
+
+# Others
 secrets.toml
 other/

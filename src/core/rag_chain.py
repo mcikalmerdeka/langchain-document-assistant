@@ -12,6 +12,9 @@ from config.prompts import (
     ENHANCED_PROMPT_TEMPLATE
 )
 from .document_processor import format_docs_with_metadata, get_unique_sources
+from config.logging import get_logger
+
+logger = get_logger("rag_chain")
 
 
 def create_rag_chain(language_model, retriever, external_search_enabled: bool = True):
@@ -26,11 +29,15 @@ def create_rag_chain(language_model, retriever, external_search_enabled: bool = 
     Returns:
         RAG chain
     """
+    logger.info(f"Creating RAG chain with external_search_enabled={external_search_enabled}")
+    
     # Choose prompt template based on external search setting
     if external_search_enabled:
         prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
+        logger.debug("Using PROMPT_TEMPLATE with external search capability")
     else:
         prompt = ChatPromptTemplate.from_template(DOCUMENT_ONLY_PROMPT_TEMPLATE)
+        logger.debug("Using DOCUMENT_ONLY_PROMPT_TEMPLATE")
     
     # Create the RAG chain using LCEL syntax with metadata-enhanced formatting
     def format_with_metadata(docs):
@@ -38,6 +45,7 @@ def create_rag_chain(language_model, retriever, external_search_enabled: bool = 
         formatted_context, sources = format_docs_with_metadata(docs)
         # Store sources in a way they can be retrieved later
         format_with_metadata._last_sources = sources
+        logger.debug(f"Formatted {len(sources)} documents with metadata")
         return formatted_context
     
     rag_chain = (
@@ -53,6 +61,7 @@ def create_rag_chain(language_model, retriever, external_search_enabled: bool = 
     # Attach sources retrieval method to chain
     rag_chain._format_with_metadata = format_with_metadata
     
+    logger.info("RAG chain created successfully")
     return rag_chain
 
 
@@ -73,12 +82,18 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
     Returns:
         Tuple of (generated answer, list of source metadata)
     """
+    logger.info(f"Generating enhanced answer for query: '{user_query[:50]}...' "
+                f"external_search_enabled={external_search_enabled}, "
+                f"external_search_available={external_search_available}")
+    
     sources = []
     
     try:
         # Step 1: Get document context with metadata
+        logger.debug("Step 1: Retrieving documents from vector store")
         docs = retriever.invoke(user_query)
         document_context, sources = format_docs_with_metadata(docs)
+        logger.info(f"Retrieved {len(docs)} documents, created {len(sources)} source entries")
         
         # Step 2: Create prompt based on external search setting
         if external_search_enabled:
@@ -87,6 +102,7 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
             prompt = ChatPromptTemplate.from_template(DOCUMENT_ONLY_PROMPT_TEMPLATE)
         
         # Step 3: Create and invoke the chain
+        logger.debug("Step 3: Creating and invoking initial chain")
         initial_chain = (
             {
                 "document_context": RunnableLambda(lambda _: document_context),
@@ -98,12 +114,14 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
         )
         
         initial_response = initial_chain.invoke(user_query)
+        logger.debug(f"Initial response length: {len(initial_response)} characters")
         
         # Step 4: Check if external search is needed and enabled
         if (external_search_enabled and 
             "[EXTERNAL_SEARCH_NEEDED]" in initial_response and 
             external_search_available):
             
+            logger.info("External search needed and available - initiating external lookup")
             st.info("🔍 Document context insufficient. Searching external sources...")
             
             try:
@@ -111,12 +129,15 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
                 from agents.external_sources_lookup_agent import lookup
                 
                 # Step 5: Perform external search
+                logger.info("Step 5: Performing external search")
                 external_results = lookup(user_query)
+                logger.info(f"External search completed, results length: {len(external_results)} characters")
                 
                 # Step 6: Create enhanced prompt with both contexts
                 enhanced_prompt = ChatPromptTemplate.from_template(ENHANCED_PROMPT_TEMPLATE)
                 
                 # Step 7: Generate enhanced response
+                logger.info("Step 7: Generating enhanced response with external context")
                 enhanced_chain = enhanced_prompt | language_model | StrOutputParser()
                 
                 final_response = enhanced_chain.invoke({
@@ -129,17 +150,21 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
                 cleaned_response = final_response.strip()
                 cleaned_response = '\n'.join(line.strip() for line in cleaned_response.split('\n') if line.strip())
                 
+                logger.info("Enhanced answer generated successfully with external search")
                 return cleaned_response, sources
                 
             except Exception as e:
+                logger.error(f"External search failed: {e}", exc_info=True)
                 st.error(f"External search failed: {str(e)}")
                 # Fall back to original response without the search indicator
                 fallback_response = initial_response.replace("[EXTERNAL_SEARCH_NEEDED]", "").strip()
                 cleaned_response = fallback_response if fallback_response else "I don't have sufficient information to answer this query."
+                logger.info("Returning fallback response without external search")
                 return cleaned_response, sources
         
         else:
             # Step 8: Return normal response (either external search disabled or not needed)
+            logger.info("No external search needed or disabled - returning document-based response")
             if not external_search_enabled:
                 # Clean response for document-only mode
                 cleaned_response = initial_response.strip()
@@ -153,6 +178,7 @@ def generate_enhanced_answer(user_query: str, rag_chain, language_model,
             return cleaned_response, sources
             
     except Exception as e:
+        logger.error(f"Error generating response: {e}", exc_info=True)
         return f"Error generating response: {str(e)}", sources
 
 
